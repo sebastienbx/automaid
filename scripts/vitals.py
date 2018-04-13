@@ -126,6 +126,8 @@ def plot_pressure_offset(vital_file_path, vital_file_name, begin, end):
     date_rev = date[::-1]
     pressure_offset = pressure_offset[i:j]
     pressure_offset_range = pressure_offset_range[i:j]
+    pressure_offset = [x for x in pressure_offset if x != -2147483648]
+    pressure_offset_range = [x for x in pressure_offset_range if x != -1]
     pressure_offset_max = [x + y for x, y in zip(pressure_offset, pressure_offset_range)]
     pressure_offset_min = [x - y for x, y in zip(pressure_offset, pressure_offset_range)]
     pressure_offset_min = pressure_offset_min[::-1]
