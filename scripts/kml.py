@@ -3,6 +3,9 @@ import random
 
 
 def generate(dest_path, mfloat_name, dives):
+    if len(dives) < 1:
+        return
+
     kml_string = str()
     kml_string += kmlbeg()
     kml_string += docbeg(mfloat_name)
