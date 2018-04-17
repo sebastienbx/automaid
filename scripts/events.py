@@ -43,6 +43,7 @@ class Events:
 
 class Event:
     file_name = None
+    environment = None
     header = None
     binary = None
     data = None
@@ -61,7 +62,6 @@ class Event:
         self.file_name = file_name
         self.header = header
         self.binary = binary
-        self.fs = float(re.findall(" SAMPLING_RATE=(\d+\.\d+)", self.header)[0])
         self.scales = re.findall(" STAGES=(-?\d+)", self.header)[0]
         catch_trig = re.findall(" TRIG=(\d+)", self.header)
         if len(catch_trig) > 0:
@@ -74,22 +74,43 @@ class Event:
             self.temperature = int(re.findall(" TEMPERATURE=(\d+)", self.header)[0])
             self.criterion = float(re.findall(" CRITERION=(\d+\.\d+)", self.header)[0])
             self.snr = float(re.findall(" SNR=(\d+\.\d+)", self.header)[0])
-            # Compute date of the first sample (recorded date is the trig date)
-            self.date = self.date - float(self.trig) / self.fs
         else:
             # Event requested by user
             self.requested = True
             date = re.findall(" DATE=(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})", header, re.DOTALL)
             self.date = UTCDateTime.strptime(date[0], "%Y-%m-%dT%H:%M:%S")
 
-    def invert_transform(self, environment):
+    def set_environment(self, environment):
+        self.environment = environment
+        # Get true frequency measured on board
+        fs_catch = re.findall("TRUE_SAMPLE_FREQ FS_Hz=(\d+\.\d+)", self.environment)
+        if len(fs_catch) > 0:
+            self.fs = float(fs_catch[0])
+            # Divide frequency by number of scales
+            int_scl = int(self.scales)
+            if int_scl >= 0:
+                self.fs = self.fs / (2.**(6-int_scl))
+            else:
+                # This is raw data sampled at 40Hz
+                pass
+        else:
+            # Backward compatibility
+            fs_catch = re.findall(" SAMPLING_RATE=(\d+\.\d+)", self.header)
+            self.fs = float(fs_catch[0])
+
+    def correct_date(self):
+        if not self.requested:
+            # Detected event: compute date of the first sample (recorded date is the trig date)
+            self.date = self.date - float(self.trig) / self.fs
+
+    def invert_transform(self):
         # If scales == -1 this is a raw signal, just convert binary data to numpy array of int32
         if self.scales == "-1":
             self.data = numpy.frombuffer(self.binary, numpy.int32)
             return
         # Get additional information to invert wavelet
-        normalized = re.findall(" NORMALIZED=(\d+)", environment)[0]
-        edge_correction = re.findall(" EDGES_CORRECTION=(\d+)", environment)[0]
+        normalized = re.findall(" NORMALIZED=(\d+)", self.environment)[0]
+        edge_correction = re.findall(" EDGES_CORRECTION=(\d+)", self.environment)[0]
         # Write cdf24 data
         with open("bin/wtcoeffs", 'w') as f:
             f.write(self.binary)

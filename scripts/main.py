@@ -63,6 +63,8 @@ def main():
                 os.mkdir(dive.export_path)
             # Generate log
             dive.generate_datetime_log()
+            # Generate mermaid environment file
+            dive.generate_mermaid_environment_file()
             # Generate dive plot
             dive.generate_dive_plotly()
 

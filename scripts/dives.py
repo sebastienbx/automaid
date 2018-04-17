@@ -104,9 +104,17 @@ class Dive:
         # Get list of events associated to the dive
         self.events = events.get_events_between(self.date, self.end_date)
 
+        # Set environment information in each event object
+        for event in self.events:
+            event.set_environment(self.mmd_environment)
+
+        # Correct events date
+        for event in self.events:
+            event.correct_date()
+
         # Invert wavelet transform of events
         for event in self.events:
-            event.invert_transform(self.mmd_environment)
+            event.invert_transform()
 
         # Find the position of the float
         self.gps_list = gps.get_gps_list(self.log_content, self.mmd_environment, self.mmd_name)
@@ -137,6 +145,18 @@ class Dive:
                 datetime_log += line.replace(timestamp, isodate) + "\r\n"
         with open(export_path, "w") as f:
             f.write(datetime_log)
+
+    def generate_mermaid_environment_file(self):
+        # Check if there is a Memraid file
+        if self.mmd_name is None:
+            return
+        # Check if file exist
+        export_path = self.export_path + self.log_name + "." + self.mmd_name + ".env"
+        if os.path.exists(export_path):
+            return
+        # Write file
+        with open(export_path, "w") as f:
+            f.write(self.mmd_environment)
 
     def generate_dive_plotly(self):
         # Check if file exist
