@@ -89,7 +89,6 @@ class Dive:
                 self.station_name = re.findall("board (.+)", utils.split_log_lines(self.log_content)[1])
             self.station_name = self.station_name[0]
 
-
         # Find the .MER file of the ascent
         catch = re.findall("bytes in (\w+/\w+\.MER)", self.log_content)
         if len(catch) > 0:
@@ -147,7 +146,7 @@ class Dive:
             f.write(datetime_log)
 
     def generate_mermaid_environment_file(self):
-        # Check if there is a Memraid file
+        # Check if there is a Mermaid file
         if self.mmd_name is None:
             return
         # Check if file exist
@@ -171,7 +170,7 @@ class Dive:
         bypass = utils.find_timestamped_values(":\[BYPASS", self.log_content)
         valve = utils.find_timestamped_values(":\[VALVE", self.log_content)
         pump = utils.find_timestamped_values(":\[PUMP", self.log_content)
-        mermaid_events = utils.find_timestamped_values("[MRMAID,\d+] *\d+dbar, *\d+degC", self.log_content)
+        mermaid_events = utils.find_timestamped_values("[MRMAID,\d+] *\d+dbar, *-?\d+degC", self.log_content)
         # Return if there is no data to plot
         if len(pressure) < 1:
             return
@@ -270,8 +269,9 @@ class Dive:
             return
 
         # Check if the next dive contain gps fix
-        if len(next_dive.gps_list) == 0:
-            print "WARNING: The next dive doesn't contain GPS fix, do not compute event location estimation for \""\
+        if len(next_dive.gps_list) <= 1:
+            print "WARNING: The next dive doesn't contain enough GPS fix,""" \
+                  + " do not compute event location estimation for \"" \
                   + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
             return
 
