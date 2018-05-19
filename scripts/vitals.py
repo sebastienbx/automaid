@@ -115,6 +115,12 @@ def plot_pressure_offset(vital_file_path, vital_file_name, begin, end):
     if len(date) < 1:
         return
 
+    # Filter wrong values
+    res = [(x, y, z) for x, y, z in zip(pressure_offset, pressure_offset_range, date) if x != -2147483648]
+    pressure_offset = [x[0] for x in res]
+    pressure_offset_range = [x[1] for x in res]
+    date = [x[2] for x in res]
+
     # Get values between the appropriate date
     i = 0
     while date[i] < begin and i < len(date)-1:
@@ -126,11 +132,9 @@ def plot_pressure_offset(vital_file_path, vital_file_name, begin, end):
     date_rev = date[::-1]
     pressure_offset = pressure_offset[i:j]
     pressure_offset_range = pressure_offset_range[i:j]
-    pressure_offset = [x for x in pressure_offset if x != -2147483648]
-    pressure_offset_range = [x for x in pressure_offset_range if x != -1]
     pressure_offset_max = [x + y for x, y in zip(pressure_offset, pressure_offset_range)]
     pressure_offset_min = [x - y for x, y in zip(pressure_offset, pressure_offset_range)]
-    pressure_offset_min = pressure_offset_min[::-1]
+    pressure_offset_min_rev = pressure_offset_min[::-1]
 
     # Add battery values to the graph
     pressure_offset_line = graph.Scatter(x=date,
@@ -141,7 +145,7 @@ def plot_pressure_offset(vital_file_path, vital_file_name, begin, end):
                                          mode='lines')
 
     pressure_offset_range = graph.Scatter(x=date + date_rev,
-                                          y=pressure_offset_max + pressure_offset_min,
+                                          y=pressure_offset_max + pressure_offset_min_rev,
                                           fill='tozerox',
                                           fillcolor='rgba(0,0,256,0.2)',
                                           name="range",

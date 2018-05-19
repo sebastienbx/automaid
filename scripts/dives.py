@@ -34,6 +34,7 @@ class Dive:
     def __init__(self, base_path, log_name, events):
         self.base_path = base_path
         self.log_name = log_name
+        print log_name
 
         # Get the date of the file
         if "_" in log_name:
