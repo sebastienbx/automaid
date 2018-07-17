@@ -36,6 +36,20 @@ def find_timestamped_values(regexp, content):
     return timestamped_values
 
 
+# Format log files
+def format_log(log):
+    datetime_log = ""
+    lines = split_log_lines(log)
+    for line in lines:
+        catch = re.findall("(\d+):", line)
+        if len(catch) > 0:
+            timestamp = catch[0]
+            isodate = UTCDateTime(int(timestamp)).isoformat()
+            datetime_log += line.replace(timestamp, isodate) + "\r\n"
+    formatted_log = "".join(datetime_log)
+    return formatted_log
+
+
 #
 # Plot utilities
 #
@@ -88,3 +102,4 @@ def get_time_array(length, period):
 def counts2pascal(data):
     factor = 0.178 / 1000. * 10. ** (23. / 20.) * 2. ** 24. / 5. * 2. ** 4.
     return data / factor
+

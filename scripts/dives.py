@@ -56,13 +56,12 @@ class Dive:
 
         # Check if the log correspond to the float initialization
         self.is_init = False
-        catch = re.findall("Enter in test mode\?", self.log_content)
-        if len(catch) > 0:
+        if "Enter in test mode?" in self.log_content and "deverminage" not in self.log_content:
             self.is_init = True
 
         # Check if the log correspond to a dive
         self.is_dive = False
-        if len(re.findall("\[DIVING,", self.log_content)) > 0:
+        if "[DIVING," in self.log_content:
             self.is_dive = True
 
         # Check if the log correspond to a complete dive
@@ -95,26 +94,28 @@ class Dive:
         if len(catch) > 0:
             self.mmd_name = catch[-1].replace("/", "_")
 
-        # Read the Mermaid environment associated to the dive
+        # If the dive contain a Mermaid file
+        self.events = list()
         if self.mmd_name:
+            # Read the Mermaid environment associated to the dive
             with open(self.base_path + self.mmd_name, "r") as f:
                 content = f.read()
             self.mmd_environment = re.findall("<ENVIRONMENT>.+</PARAMETERS>", content, re.DOTALL)[0]
 
-        # Get list of events associated to the dive
-        self.events = events.get_events_between(self.date, self.end_date)
+            # Get list of events associated to the dive
+            self.events = events.get_events_between(self.date, self.end_date)
 
-        # Set environment information in each event object
-        for event in self.events:
-            event.set_environment(self.mmd_environment)
+            # Set environment information in each event object
+            for event in self.events:
+                event.set_environment(self.mmd_environment)
 
-        # Correct events date
-        for event in self.events:
-            event.correct_date()
+            # Correct events date
+            for event in self.events:
+                event.correct_date()
 
-        # Invert wavelet transform of events
-        for event in self.events:
-            event.invert_transform()
+            # Invert wavelet transform of events
+            for event in self.events:
+                event.invert_transform()
 
         # Find the position of the float
         self.gps_list = gps.get_gps_list(self.log_content, self.mmd_environment, self.mmd_name)
@@ -123,7 +124,10 @@ class Dive:
             # Check that the last GPS fix of the list correspond to the ascent position
             surface_date = utils.find_timestamped_values("\[MAIN *, *\d+\]surface", self.log_content)
             surface_date = UTCDateTime(surface_date[0][1])
-            if self.gps_list[-1].date > surface_date:
+            if len(self.gps_list) == 0:
+                print "WARNING: No GPS synchronization at all for \"" \
+                        + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
+            elif self.gps_list[-1].date > surface_date:
                 self.gps_list_is_complete = True
             else:
                 print "WARNING: No GPS synchronization after surfacing for \"" \
@@ -135,16 +139,10 @@ class Dive:
         if os.path.exists(export_path):
             return
         # Generate log with formatted date
-        datetime_log = ""
-        lines = utils.split_log_lines(self.log_content)
-        for line in lines:
-            catch = re.findall("(\d+):", line)
-            if len(catch) > 0:
-                timestamp = catch[0]
-                isodate = UTCDateTime(int(timestamp)).isoformat()
-                datetime_log += line.replace(timestamp, isodate) + "\r\n"
+        formatted_log = utils.format_log(self.log_content)
+        # Write file
         with open(export_path, "w") as f:
-            f.write(datetime_log)
+            f.write(formatted_log)
 
     def generate_mermaid_environment_file(self):
         # Check if there is a Mermaid file
@@ -269,6 +267,13 @@ class Dive:
             #       + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
             return
 
+        # Check if the dive contain enough gps fix
+        if len(self.gps_list) <= 1:
+            print "WARNING: The current dive doesn't contain enough GPS fix,""" \
+                  + " do not compute event location estimation for \"" \
+                  + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
+            return
+
         # Check if the next dive contain gps fix
         if len(next_dive.gps_list) <= 1:
             print "WARNING: The next dive doesn't contain enough GPS fix,""" \
@@ -327,7 +332,8 @@ class Dive:
             i -= 1
         d1 = pressure_date[i]
         p1 = pressure_val[i]
-        if i < len(pressure_val) or pressure_val[i] > mixed_layer_depth_m:
+
+        if i < len(pressure_val)-1:
             d2 = pressure_date[i+1]
             p2 = pressure_val[i+1]
         else:
