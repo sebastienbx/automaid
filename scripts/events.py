@@ -202,25 +202,31 @@ class Event:
         plt.clf()
         plt.close()
 
-    def sac(self, export_path, station_name):
+    def to_sac_and_mseed(self, export_path, station_number):
         # Check if file exist
-        export_path = export_path + self.get_export_file_name() + ".sac"
-        if os.path.exists(export_path):
+        export_path_sac = export_path + self.get_export_file_name() + ".sac"
+        export_path_msd = export_path + self.get_export_file_name() + ".mseed"
+        if os.path.exists(export_path_sac) and os.path.exists(export_path_msd):
             return
+
+        # Check if the station location have been calculated
+        if self.station_loc is None:
+            return
+
         # Fill header info
         stats = Stats()
         stats.sampling_rate = self.fs
         stats.network = "MH"
-        stats.station = station_name
+        stats.station = station_number
         stats.starttime = self.date
 
         stats.sac = dict()
-        stats.sac["STLA"] = self.station_loc.latitude
-        stats.sac["STLO"] = self.station_loc.longitude
-        stats.sac["STDP"] = self.depth
-        stats.sac["USER0"] = self.snr
-        stats.sac["USER1"] = self.criterion
-        stats.sac["IZTYPE"] = 'IB'
+        stats.sac["stla"] = self.station_loc.latitude
+        stats.sac["stlo"] = self.station_loc.longitude
+        stats.sac["stdp"] = self.depth
+        stats.sac["user0"] = self.snr
+        stats.sac["user1"] = self.criterion
+        stats.sac["iztype"] = 9  # 9 == IB in sac format
 
         # Save data into a Stream object
         trace = Trace()
@@ -229,4 +235,5 @@ class Event:
         stream = Stream(traces=[trace])
 
         # Save stream object
-        stream.write(export_path, format='SAC')
+        stream.write(export_path_sac, format='SAC')
+        stream.write(export_path_msd, format='MSEED')
