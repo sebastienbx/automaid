@@ -215,11 +215,12 @@ class Event:
         stats.starttime = self.date
 
         stats.sac = dict()
-        stats.sac["stla"] = self.station_loc.latitude
-        stats.sac["stlo"] = self.station_loc.longitude
-        stats.sac["stdp"] = self.depth
-        stats.sac["user0"] = self.snr
-        stats.sac["user1"] = self.criterion
+        stats.sac["STLA"] = self.station_loc.latitude
+        stats.sac["STLO"] = self.station_loc.longitude
+        stats.sac["STDP"] = self.depth
+        stats.sac["USER0"] = self.snr
+        stats.sac["USER1"] = self.criterion
+        stats.sac["IZTYPE"] = 'IB'
 
         # Save data into a Stream object
         trace = Trace()
