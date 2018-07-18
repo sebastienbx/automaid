@@ -149,7 +149,7 @@ def plot_pressure_offset(vital_file_path, vital_file_name, begin, end):
                                           fill='tozerox',
                                           fillcolor='rgba(0,0,256,0.2)',
                                           name="range",
-                                          line=dict(color='transparent'),
+                                          line=dict(color='rgba(0, 0, 0, 0)'),
                                           showlegend=False)
 
     data = [pressure_offset_line, pressure_offset_range]
