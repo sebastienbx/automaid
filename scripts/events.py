@@ -215,8 +215,8 @@ class Event:
         stats.starttime = self.date
 
         stats.sac = dict()
-        # stats.sac["stla"] =
-        # stats.sac["stlo"] =
+        stats.sac["stla"] = self.station_loc.latitude
+        stats.sac["stlo"] = self.station_loc.longitude
         stats.sac["stdp"] = self.depth
         stats.sac["user0"] = self.snr
         stats.sac["user1"] = self.criterion
