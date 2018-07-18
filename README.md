@@ -9,8 +9,8 @@ procedure is valid but one could prefer to use the package manager.
 For Windows the installation of python 2.7 is valid but the compilation
 of the wavelet inversion program with "make" could be problematic.
 
-Any python 2.7 installation with obspy, matplotlib and plotly can be
-used to use the processing tools of Mermaid.
+Any python 2.7 installation with obspy, matplotlib and plotly 2.7.0 can be
+used.
 
 An easy installation procedure is described here:
 
@@ -24,8 +24,8 @@ An easy installation procedure is described here:
 `source activate pymaid`
 * Install obspy:  
 `conda install obspy`
-* Install plotly:  
-`conda install plotly`
+* Install plotly 2.7.0:  
+`conda install plotly=2.7.0`
 * Quit the virtual environment:  
 `source deactivate`
 
@@ -34,7 +34,6 @@ the wavelet invention program located in `scripts/bin/V103_Sources/` and
 `scripts/bin/V103EC_Sources/`. The compiled binaries must be placed in
 the "bin" directory and must be named `icdf24_v103_test` and
 `icdf24_v103ec_test`.
-
 
 ### 2. USAGE
 
