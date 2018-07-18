@@ -20,6 +20,10 @@ events_plotly = True
 
 
 def main():
+    # Create processed directory if it doesn't exist
+    if not os.path.exists("../processed/"):
+        os.mkdir("../processed/")
+
     # Set working directory in "scripts"
     if "scripts" in os.listdir("."):
         os.chdir("scripts")
