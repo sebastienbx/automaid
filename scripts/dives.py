@@ -24,6 +24,7 @@ class Dive:
     mmd_environment = None
     events = None
     station_name = None
+    station_number = None
     gps_list = None
     gps_list_is_complete = None
     surface_leave_loc = None
@@ -88,6 +89,7 @@ class Dive:
             if len(self.station_name) == 0:
                 self.station_name = re.findall("board (.+)", utils.split_log_lines(self.log_content)[1])
             self.station_name = self.station_name[0]
+            self.station_number = self.station_name.split("-")[-1]
 
         # Find the .MER file of the ascent
         catch = re.findall("bytes in (\w+/\w+\.MER)", self.log_content)
@@ -361,7 +363,7 @@ class Dive:
 
     def generate_events_sac(self):
         for event in self.events:
-            event.sac(self.export_path, self.station_name)
+            event.to_sac_and_mseed(self.export_path, self.station_number)
 
 
 # Create dives object
