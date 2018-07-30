@@ -111,17 +111,25 @@ def get_gps_from_mermaid_environment(mmd_name, content):
         else:
             fixdate = None
 
-        latitude = re.findall(" LAT=([+,-]\d+\.\d+)", gps_tag)
+        latitude = re.findall(" LAT=([+,-])(\d{2})(\d+\.\d+)", gps_tag)
         if len(latitude) > 0:
             latitude = latitude[0]
-            latitude = float(latitude[0:3]) + float(latitude[3:]) / 60.
+            if latitude[0] == "+":
+                sign = 1
+            elif latitude[0] == "-":
+                sign = -1
+            latitude = sign*(float(latitude[1]) + float(latitude[2])/60.)
         else:
             latitude = None
 
-        longitude = re.findall(" LON=([+,-]\d+\.\d+)", gps_tag)
+        longitude = re.findall(" LON=([+,-])(\d{3})(\d+\.\d+)", gps_tag)
         if len(longitude) > 0:
             longitude = longitude[0]
-            longitude = float(longitude[0:4]) + float(longitude[4:]) / 60.
+            if longitude[0] == "+":
+                sign = 1
+            elif longitude[0] == "-":
+                sign = -1
+            longitude = sign*(float(longitude[1]) + float(longitude[2])/60.)
         else:
             longitude = None
 
@@ -192,21 +200,25 @@ def get_gps_from_log(content):
         else:
             fixdate = None
 
-        latitude = re.findall("([S,N]\d+)deg(\d+.\d+)mn", gps_log)
+        latitude = re.findall("([S,N])(\d+)deg(\d+.\d+)mn", gps_log)
         if len(latitude) > 0:
             latitude = latitude[0]
-            latitude = (latitude[0].replace("N", "+"), latitude[1])
-            latitude = (latitude[0].replace("S", "-"), latitude[1])
-            latitude = float(latitude[0]) + float(latitude[1])/60.
+            if latitude[0] == "N":
+                sign = 1
+            elif latitude[0] == "S":
+                sign = -1
+            latitude = sign*(float(latitude[1]) + float(latitude[2])/60.)
         else:
             latitude = None
 
-        longitude = re.findall("([E,W]\d+)deg(\d+.\d+)mn", gps_log)
+        longitude = re.findall("([E,W])(\d+)deg(\d+.\d+)mn", gps_log)
         if len(longitude) > 0:
             longitude = longitude[0]
-            longitude = (longitude[0].replace("E", "+"), longitude[1])
-            longitude = (longitude[0].replace("W", "-"), longitude[1])
-            longitude = float(longitude[0]) + float(longitude[1])/60.
+            if longitude[0] == "E":
+                sign = 1
+            elif longitude[0] == "W":
+                sign = -1
+            longitude = sign*(float(longitude[1]) + float(longitude[2])/60.)
         else:
             longitude = None
 
