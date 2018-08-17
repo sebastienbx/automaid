@@ -363,7 +363,7 @@ class Dive:
 
     def generate_events_sac(self):
         for event in self.events:
-            event.to_sac_and_mseed(self.export_path, self.station_number)
+            event.to_sac_and_mseed(self.export_path, self.station_number, force_without_loc=False)
 
 
 # Create dives object

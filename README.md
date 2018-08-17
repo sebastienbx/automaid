@@ -61,5 +61,5 @@ disk space.
 
 An additional tool is available to invert a single ".MER" files. For
 this, go in the `scripts` directory. Put a Mermaid file with the
-extension ".MER" in the `scripts/invert_mer_file` directory. And
-finally run the script: `python invert_mer_file.py`.
+extension ".MER" in the `scripts/tool_invert_mer` directory. And
+finally run the script: `python tool_invert_mer.py`.

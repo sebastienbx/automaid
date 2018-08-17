@@ -202,7 +202,7 @@ class Event:
         plt.clf()
         plt.close()
 
-    def to_sac_and_mseed(self, export_path, station_number):
+    def to_sac_and_mseed(self, export_path, station_number, force_without_loc):
         # Check if file exist
         export_path_sac = export_path + self.get_export_file_name() + ".sac"
         export_path_msd = export_path + self.get_export_file_name() + ".mseed"
@@ -210,7 +210,8 @@ class Event:
             return
 
         # Check if the station location have been calculated
-        if self.station_loc is None:
+        if self.station_loc is None and not force_without_loc:
+            print self.get_export_file_name() + ": Skip sac/mseed generation, wait the next ascent to compute location"
             return
 
         # Fill header info
@@ -221,8 +222,9 @@ class Event:
         stats.starttime = self.date
 
         stats.sac = dict()
-        stats.sac["stla"] = self.station_loc.latitude
-        stats.sac["stlo"] = self.station_loc.longitude
+        if not force_without_loc:
+            stats.sac["stla"] = self.station_loc.latitude
+            stats.sac["stlo"] = self.station_loc.longitude
         stats.sac["stdp"] = self.depth
         stats.sac["user0"] = self.snr
         stats.sac["user1"] = self.criterion
