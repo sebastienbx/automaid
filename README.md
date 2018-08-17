@@ -1,5 +1,8 @@
 # automaid
 
+This version is no more maintained, updated version can be found on the earthscopeoceans github:
+[https://github.com/earthscopeoceans/automaid](https://github.com/earthscopeoceans/automaid)
+
 This program convert raw data transmitted by Mermaid instruments to classify datas, correct clock drifts, interpolate float position and then generate seismic SAC files, plot seismic events and dives and generate KML files.
 
 ### 1. INSTALLATION
