@@ -38,10 +38,7 @@ class Dive:
         print log_name
 
         # Get the date of the file
-        if "_" in log_name:
-            hexdate = log_name[3:-4]
-        else:
-            hexdate = log_name[0:-4]
+        hexdate = re.findall("\d+_([A-Z0-9]+)\.LOG", log_name)[0]
         timestamp = int(hexdate, 16)
 
         # Convert to datetime object
@@ -129,8 +126,11 @@ class Dive:
             if len(self.gps_list) == 0:
                 print "WARNING: No GPS synchronization at all for \"" \
                         + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
-            elif self.gps_list[-1].date > surface_date:
+            elif len(self.gps_list) > 1 and self.gps_list[-1].date > surface_date:
                 self.gps_list_is_complete = True
+            elif self.gps_list[-1].date > surface_date:
+                print "WARNING: No GPS synchronization before diving for \"" \
+                        + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
             else:
                 print "WARNING: No GPS synchronization after surfacing for \"" \
                         + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""

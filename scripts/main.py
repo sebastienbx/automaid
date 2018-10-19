@@ -6,6 +6,7 @@ import dives
 import events
 import vitals
 import kml
+import re
 
 # Time range for the analysis
 begin = datetime.datetime(2017, 1, 1)
@@ -39,6 +40,9 @@ def main():
         # Set the path for the float
         mfloat_path = "../processed/" + mfloat + "/"
 
+        # Get float number
+        mfloat_nb = re.findall("(\d+)$", mfloat)[0]
+
         # Delete the directory if the redo flag is true
         if redo and os.path.exists(mfloat_path):
             shutil.rmtree(mfloat_path)
@@ -50,7 +54,7 @@ def main():
         # Copy appropriate files in the directory
         for f in glob.glob("../server/" + mfloat + "*"):
             shutil.copy(f, mfloat_path)
-        for f in glob.glob("../server/" + mfloat[-2:] + "_*"):
+        for f in glob.glob("../server/" + mfloat_nb + "_*"):
             shutil.copy(f, mfloat_path)
 
         # Build list of all mermaid events recorded by the float
@@ -99,9 +103,9 @@ def main():
         # Clean directories
         for f in glob.glob(mfloat_path + "/" + mfloat + "*"):
             os.remove(f)
-        for f in glob.glob(mfloat_path + "/" + mfloat[-2:] + "_*.LOG"):
+        for f in glob.glob(mfloat_path + "/" + mfloat_nb + "_*.LOG"):
             os.remove(f)
-        for f in glob.glob(mfloat_path + "/" + mfloat[-2:] + "_*.MER"):
+        for f in glob.glob(mfloat_path + "/" + mfloat_nb + "_*.MER"):
             os.remove(f)
 
 
