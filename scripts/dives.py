@@ -54,7 +54,8 @@ class Dive:
 
         # Check if the log correspond to the float initialization
         self.is_init = False
-        if "Enter in test mode?" in self.log_content and "deverminage" not in self.log_content:
+        match = re.search("\[TESTMD,\d{3}\]\"yes\"", self.log_content)
+        if "Enter in test mode?" in self.log_content and not match:
             self.is_init = True
 
         # Check if the log correspond to a dive
