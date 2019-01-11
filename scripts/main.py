@@ -19,6 +19,9 @@ redo = False
 # WARNING: Plotly files takes a lot of memory so commented by default
 events_plotly = True
 
+# Path for input datas
+dataPath = "server"
+
 
 def main():
     # Create processed directory if it doesn't exist
@@ -30,7 +33,7 @@ def main():
         os.chdir("scripts")
 
     # Search Mermaid floats
-    mfloats = [p.split("/")[-1][:-4] for p in glob.glob("../server/*.vit")]
+    mfloats = [p.split("/")[-1][:-4] for p in glob.glob("../" + dataPath + "/*.vit")]
 
     # For each Mermaid float
     for mfloat in mfloats:
@@ -52,9 +55,9 @@ def main():
             os.mkdir(mfloat_path)
 
         # Copy appropriate files in the directory
-        for f in glob.glob("../server/" + mfloat + "*"):
+        for f in glob.glob("../" + dataPath + "/" + mfloat + "*"):
             shutil.copy(f, mfloat_path)
-        for f in glob.glob("../server/" + mfloat_nb + "_*"):
+        for f in glob.glob("../" + dataPath + "/" + mfloat_nb + "_*"):
             shutil.copy(f, mfloat_path)
 
         # Build list of all mermaid events recorded by the float
