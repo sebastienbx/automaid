@@ -284,6 +284,12 @@ class Dive:
                   + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
             return
 
+        # Warning GPS list is incomplete, do not compute event location
+        if not self.gps_list_is_complete:
+            print "WARNING: GPS list is incomplete, do not compute event location for \""\
+                  + str(self.mmd_name) + "\", \"" + str(self.log_name) + "\""
+            return
+
         # Divide gps in two list
         gps_before_dive = self.gps_list[:-1]
         gps_after_dive = [self.gps_list[-1]] + next_dive.gps_list[:-1]
