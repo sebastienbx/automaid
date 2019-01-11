@@ -26,13 +26,13 @@ dataPath = "server"
 
 
 def main():
-    # Create processed directory if it doesn't exist
-    if not os.path.exists("../processed/"):
-        os.mkdir("../processed/")
-
     # Set working directory in "scripts"
     if "scripts" in os.listdir("."):
         os.chdir("scripts")
+
+    # Create processed directory if it doesn't exist
+    if not os.path.exists("../processed/"):
+        os.mkdir("../processed/")
 
     # Search Mermaid floats
     mfloats = [p.split("/")[-1][:-4] for p in glob.glob("../" + dataPath + "/*.vit")]
