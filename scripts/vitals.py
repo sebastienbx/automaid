@@ -111,7 +111,6 @@ def plot_pressure_offset(vital_file_path, vital_file_name, begin, end):
     date = [UTCDateTime(0).strptime(i[0], "%Y%m%d-%Hh%Mmn%S") for i in pressure_offset_catch]
     pressure_offset = [int(i[1]) for i in pressure_offset_catch]
     pressure_offset_range = [int(i[2]) for i in pressure_offset_catch]
-
     if len(date) < 1:
         return
 
@@ -120,6 +119,8 @@ def plot_pressure_offset(vital_file_path, vital_file_name, begin, end):
     pressure_offset = [x[0] for x in res]
     pressure_offset_range = [x[1] for x in res]
     date = [x[2] for x in res]
+    if len(date) < 1:
+        return
 
     # Get values between the appropriate date
     i = 0
