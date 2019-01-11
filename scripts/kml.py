@@ -315,10 +315,9 @@ def interpolated_point_marker(dives):
 
 def last_pos_marker(dives):
     last_dive = dives[-1]
-    if len(last_dive.gps_list) < 1:
+    if len(last_dive.gps_list) < 1 or not last_dive.station_name:
         return ""
     last_pos = last_dive.gps_list[-1]
-
     pos = str(last_pos.longitude) + "," + str(last_pos.latitude) + ",0"
 
     string = """
