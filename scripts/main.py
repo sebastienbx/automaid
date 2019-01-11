@@ -8,9 +8,11 @@ import vitals
 import kml
 import re
 
-# Time range for the analysis
-begin = datetime.datetime(2017, 1, 1)
-end = datetime.datetime(2100, 1, 1)
+# Set a time range of analysis for a specific float
+filterDate = [
+    ("452.020-P-06", datetime.datetime(2018, 5, 7), datetime.datetime(2100, 1, 1)),
+    ("452.020-P-07", datetime.datetime(2018, 5, 1), datetime.datetime(2100, 1, 1))
+]
 
 # Boolean set to true in order to delete every processed data and redo everything
 redo = False
@@ -65,10 +67,17 @@ def main():
 
         # Process data for each dive
         mdives = dives.get_dives(mfloat_path, mevents)
+
+        # Filter dives between begin and end date
+        for fd in filterDate:
+            fname = fd[0]
+            begin = fd[1]
+            end = fd[2]
+            if fname == mfloat:
+                mdives = [dive for dive in mdives if dive.date >= begin and dive.date <= end]
+
+        # Compute files for each dive
         for dive in mdives:
-            # Check the begin and end date
-            if dive.date < begin or dive.date > end:
-                continue
             # Create the directory
             if not os.path.exists(dive.export_path):
                 os.mkdir(dive.export_path)
