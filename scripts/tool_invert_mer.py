@@ -10,8 +10,9 @@ def invert_main():
             content = f.read()
         environment = re.findall("<ENVIRONMENT>.+</PARAMETERS>", content, re.DOTALL)[0]
         event.set_environment(environment)
-        event.invert_transform()
+        event.find_measured_sampling_frequency()
         event.correct_date()
+        event.invert_transform()
         event.plotly(mer_file_path)
         event.plot(mer_file_path)
         event.to_sac_and_mseed(mer_file_path, station_number="00", force_without_loc=True)

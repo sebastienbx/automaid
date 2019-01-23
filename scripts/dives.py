@@ -101,16 +101,15 @@ class Dive:
             # Get list of events associated to the dive
             self.events = events.get_events_between(self.date, self.end_date)
 
-            # Set environment information in each event object
+            # For each event
             for event in self.events:
+                # 1 Set the environment information
                 event.set_environment(self.mmd_environment)
-
-            # Correct events date
-            for event in self.events:
+                # 2 Find true sampling frequency
+                event.find_measured_sampling_frequency()
+                # 3 Correct events date
                 event.correct_date()
-
-            # Invert wavelet transform of events
-            for event in self.events:
+                # 4 Invert wavelet transform of event
                 event.invert_transform()
 
         # Find the position of the float

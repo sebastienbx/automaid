@@ -48,7 +48,8 @@ class Event:
     binary = None
     data = None
     date = None
-    fs = None
+    measured_fs = None   # Measured sampling frequency
+    decimated_fs = None  # Sampling frequency of the received data
     trig = None
     depth = None
     temperature = None
@@ -82,26 +83,41 @@ class Event:
 
     def set_environment(self, environment):
         self.environment = environment
-        # Get true frequency measured on board
+
+    def find_measured_sampling_frequency(self):
+        # Get the frequency recorded in the .MER environment header
         fs_catch = re.findall("TRUE_SAMPLE_FREQ FS_Hz=(\d+\.\d+)", self.environment)
-        if len(fs_catch) > 0:
-            self.fs = float(fs_catch[0])
-            # Divide frequency by number of scales
-            int_scl = int(self.scales)
-            if int_scl >= 0:
-                self.fs = self.fs / (2.**(6-int_scl))
-            else:
-                # This is raw data sampled at 40Hz
-                pass
-        else:
-            # Backward compatibility
-            fs_catch = re.findall(" SAMPLING_RATE=(\d+\.\d+)", self.header)
-            self.fs = float(fs_catch[0])
+        self.measured_fs = float(fs_catch[0])
+
+        # Divide frequency by number of scales
+        int_scl = int(self.scales)
+        if int_scl >= 0:
+            self.decimated_fs = self.measured_fs / (2. ** (6 - int_scl))
+        # Else: This is raw data sampled at 40Hz
 
     def correct_date(self):
-        if not self.requested:
-            # Detected event: compute date of the first sample (recorded date is the trig date)
-            self.date = self.date - float(self.trig) / self.fs
+        # Calculate the date of the first sample
+        if self.requested:
+            # For a requested event
+            rec_file_date = re.findall("FNAME=(\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2}\.\d{6})", self.header)
+            sample_offset = re.findall("SMP_OFFSET=(\d+)", self.header)
+            rec_file_date = UTCDateTime.strptime(rec_file_date[0], "%Y-%m-%dT%H_%M_%S.%f")
+            sample_offset = float(sample_offset[0])
+            self.date = rec_file_date + sample_offset/self.measured_fs
+        else:
+            # For a detected event
+            # The recorded date is the STA/LTA trigger date, subtract the time before the trigger.
+            self.date = self.date - float(self.trig) / self.decimated_fs
+
+    def correct_clock_drift(self, gps_descent, gps_ascent):
+        # Correct the clock drift of the Mermaid board with GPS measurement
+        pct = (self.date - gps_descent.date) / (gps_ascent.date - gps_descent.date)
+        self.drift_correction = gps_ascent.clockdrift * pct
+        # Apply correction
+        self.date = self.date + self.drift_correction
+
+    def compute_station_location(self, drift_begin_gps, drift_end_gps):
+        self.station_loc = gps.linear_interpolation([drift_begin_gps, drift_end_gps], self.date)
 
     def invert_transform(self):
         # If scales == -1 this is a raw signal, just convert binary data to numpy array of int32
@@ -128,15 +144,6 @@ class Event:
         # Read icd24 data
         self.data = numpy.fromfile("bin/wtcoeffs.icdf24_" + self.scales, numpy.int32)
 
-    def correct_clock_drift(self, gps_descent, gps_ascent):
-        pct = (self.date - gps_descent.date) / (gps_ascent.date - gps_descent.date)
-        self.drift_correction = gps_ascent.clockdrift * pct
-        # Apply correction
-        self.date = self.date + self.drift_correction
-
-    def compute_station_location(self, drift_begin_gps, drift_end_gps):
-        self.station_loc = gps.linear_interpolation([drift_begin_gps, drift_end_gps], self.date)
-
     def get_export_file_name(self):
         export_file_name = UTCDateTime.strftime(UTCDateTime(self.date), "%Y%m%dT%H%M%S") + "." + self.file_name
         if not self.trig:
@@ -151,7 +158,7 @@ class Event:
 
     def __get_figure_title(self):
         title = "" + self.date.isoformat() \
-                + "     Fs = " + str(self.fs) + "Hz\n" \
+                + "     Fs = " + str(self.decimated_fs) + "Hz\n" \
                 + "     Depth: " + str(self.depth) + " m" \
                 + "     Temperature: " + str(self.temperature) + " degC" \
                 + "     Criterion = " + str(self.criterion) \
@@ -164,7 +171,7 @@ class Event:
         if os.path.exists(export_path):
             return
         # Add acoustic values to the graph
-        data_line = graph.Scatter(x=utils.get_date_array(self.date, len(self.data), 1./self.fs),
+        data_line = graph.Scatter(x=utils.get_date_array(self.date, len(self.data), 1./self.decimated_fs),
                                   y=self.data,
                                   name="counts",
                                   line=dict(color='blue',
@@ -191,7 +198,7 @@ class Event:
         # Plot frequency image
         plt.figure(figsize=(9, 4))
         plt.title(self.__get_figure_title(), fontsize=12)
-        plt.plot(utils.get_time_array(len(self.data), 1./self.fs),
+        plt.plot(utils.get_time_array(len(self.data), 1./self.decimated_fs),
                  self.data,
                  color='b')
         plt.xlabel("Time (s)", fontsize=12)
@@ -216,7 +223,7 @@ class Event:
 
         # Fill header info
         stats = Stats()
-        stats.sampling_rate = self.fs
+        stats.sampling_rate = self.decimated_fs
         stats.network = "MH"
         stats.station = station_number
         stats.starttime = self.date
