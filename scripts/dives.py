@@ -37,12 +37,8 @@ class Dive:
         self.log_name = log_name
         print log_name
 
-        # Get the date of the file
-        hexdate = re.findall("\d+_([A-Z0-9]+)\.LOG", log_name)[0]
-        timestamp = int(hexdate, 16)
-
-        # Convert to datetime object
-        self.date = UTCDateTime(timestamp)
+        # Get the date from the file name
+        self.date = utils.get_date_from_file_name(log_name)
 
         # Read the content of the LOG
         with open(self.base_path + self.log_name, "r") as f:
