@@ -132,11 +132,13 @@ class Event:
             f.write(self.binary)
         # Do icd24
         if edge_correction == "1":
+            #print "icdf24_v103ec_test"
             subprocess.check_output(["bin/icdf24_v103ec_test",
                                      self.scales,
                                      normalized,
                                      "bin/wtcoeffs"])
         else:
+            #print "icdf24_v103_test"
             subprocess.check_output(["bin/icdf24_v103_test",
                                     self.scales,
                                     normalized,
@@ -221,7 +223,7 @@ class Event:
             return
 
         # Get stream object
-        stream = self.get_stream()
+        stream = self.get_stream(export_path, station_number, force_without_loc)
 
         # Save stream object
         stream.write(export_path_msd, format='MSEED')
@@ -238,7 +240,7 @@ class Event:
             return
 
         # Get stream object
-        stream = self.get_stream()
+        stream = self.get_stream(export_path, station_number, force_without_loc)
 
         # Save stream object
         stream.write(export_path_sac, format='SAC')
