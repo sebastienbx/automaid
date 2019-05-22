@@ -150,6 +150,8 @@ def main():
         vitals.plot_battery_voltage(mfloat_path, mfloat + ".vit", begin, end)
         vitals.plot_internal_pressure(mfloat_path, mfloat + ".vit", begin, end)
         vitals.plot_pressure_offset(mfloat_path, mfloat + ".vit", begin, end)
+        if len(mdives) > 1:
+            vitals.plot_corrected_pressure_offset(mfloat_path, mdives, begin, end)
 
         # Clean directories
         for f in glob.glob(mfloat_path + "/" + mfloat_nb + "_*.LOG"):
