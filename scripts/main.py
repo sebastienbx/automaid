@@ -41,7 +41,10 @@ redo = False
 
 # Plot interactive figures in HTML format for acoustic events
 # WARNING: Plotly files takes a lot of memory so commented by default
-events_plotly = True
+events_plotly = False
+events_mseed = True
+events_sac = True
+events_png = True
 
 # Path for input datas
 dataPath = "server"
@@ -133,10 +136,14 @@ def main():
 
         # Generate plot and sac files
         for dive in mdives:
-            dive.generate_events_plot()
+            if events_png:
+                dive.generate_events_png()
             if events_plotly:
                 dive.generate_events_plotly()
-            dive.generate_events_sac()
+            if events_sac:
+                dive.generate_events_sac()
+            if events_mseed:
+                dive.generate_events_mseed()
 
         # Plot vital data
         kml.generate(mfloat_path, mfloat, mdives)

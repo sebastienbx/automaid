@@ -359,13 +359,17 @@ class Dive:
         for event in self.events:
             event.plotly(self.export_path)
 
-    def generate_events_plot(self):
+    def generate_events_png(self):
         for event in self.events:
-            event.plot(self.export_path)
+            event.plot_png(self.export_path)
 
     def generate_events_sac(self):
         for event in self.events:
-            event.to_sac_and_mseed(self.export_path, self.station_number, force_without_loc=False)
+            event.to_sac(self.export_path, self.station_number, force_without_loc=False)
+
+    def generate_events_mseed(self):
+        for event in self.events:
+            event.to_mseed(self.export_path, self.station_number, force_without_loc=False)
 
 
 # Create dives object
