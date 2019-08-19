@@ -99,9 +99,14 @@ class Event:
         # Calculate the date of the first sample
         if self.requested:
             # For a requested event
-            rec_file_date = re.findall("FNAME=(\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2}\.\d{6})", self.header)
+            rec_file_date = re.findall("FNAME=(\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2})", self.header)
+            rec_file_date = UTCDateTime.strptime(rec_file_date[0], "%Y-%m-%dT%H_%M_%S")
+
+            rec_file_ms = re.findall("FNAME=\d{4}-\d{2}-\d{2}T\d{2}_\d{2}_\d{2}\.?(\d{6}?)", self.header)
+            if len(rec_file_ms) > 0:
+                rec_file_date += float("0." + rec_file_ms[0])
+
             sample_offset = re.findall("SMP_OFFSET=(\d+)", self.header)
-            rec_file_date = UTCDateTime.strptime(rec_file_date[0], "%Y-%m-%dT%H_%M_%S.%f")
             sample_offset = float(sample_offset[0])
             self.date = rec_file_date + sample_offset/self.measured_fs
         else:
