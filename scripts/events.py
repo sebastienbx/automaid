@@ -93,7 +93,9 @@ class Event:
         int_scl = int(self.scales)
         if int_scl >= 0:
             self.decimated_fs = self.measured_fs / (2. ** (6 - int_scl))
-        # Else: This is raw data sampled at 40Hz
+        else:
+            # This is raw data sampled at 40Hz
+            self.decimated_fs = self.measured_fs
 
     def correct_date(self):
         # Calculate the date of the first sample
