@@ -95,8 +95,9 @@ def main():
 
         # Copy appropriate files in the directory and remove files outside of the time range
         files_to_copy = list()
-        files_to_copy += glob.glob("../" + dataPath + "/" + mfloat_nb + "*.LOG")
-        files_to_copy += glob.glob("../" + dataPath + "/" + mfloat_nb + "*.MER")
+        extensions = ["000", "001", "002", "003", "004", "005", "LOG", "MER"]
+        for extension in extensions:
+            files_to_copy += glob.glob("../" + dataPath + "/" + mfloat_nb + "*." + extension)
         if mfloat in filterDate.keys():
             begin = filterDate[mfloat][0]
             end = filterDate[mfloat][1]
